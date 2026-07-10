@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Control de Asistencia QR</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#BF1534',
+                            green: '#208C65',
+                            yellow: '#F29F05',
+                            orange: '#F2620F',
+                            light: '#F2F2F2'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="text-gray-800 pb-24">
+
+    <header class="bg-white px-5 py-4 shadow-sm sticky top-0 z-40 flex justify-between items-center border-b border-gray-100">
+        <h1 class="text-base font-bold text-gray-900 tracking-tight">Sistema de Asistencia</h1>
+        <span id="header-date" class="text-xs font-bold text-brand-green bg-brand-green/10 px-2.5 py-1 rounded-lg"></span>
+    </header>
+
+    <main id="app-main" class="p-4 max-w-lg mx-auto space-y-4"></main>
+
+    <div id="app-modal"></div>
+
+    <div id="app-nav"></div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
