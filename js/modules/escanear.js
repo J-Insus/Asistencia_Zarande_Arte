@@ -1,4 +1,4 @@
-import state from '../core/state.js';
+import { state } from '../core/state.js';
 import { registrarAsistenciaCloud, showLoader, hideLoader } from '../core/storage.js';
 import { getToday } from '../core/date.js';
 import { renderUI } from '../core/render.js';
