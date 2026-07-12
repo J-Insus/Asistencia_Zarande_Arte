@@ -4,11 +4,9 @@ import { getToday } from './date.js';
 
 export async function evaluarFaltasYMorasAutomaticas() {
     const hoy = getToday();
-    // Iteramos sobre las llaves de días reales donde hubo escaneos confirmados
     const diasConAsistencia = Object.keys(state.dbAttendance);
 
     for (const dia of diasConAsistencia) {
-        // Validación estricta: Saltarse el día actual y los días previamente cerrados/evaluados
         if (dia >= hoy || state.dbEvaluatedDays.includes(dia)) continue;
 
         const listaAsistidosEseDia = state.dbAttendance[dia] || [];
@@ -22,13 +20,11 @@ export async function evaluarFaltasYMorasAutomaticas() {
 
             let huboCambios = false;
 
-            // 1. Recargo de mora recurrente por saldos históricos vencidos
             if (teniaDeudaPrevia) {
                 user.deuda += 1000;
                 huboCambios = true;
             }
 
-            // 2. Penalización automática por inasistencia en día activo pasado
             if (!asistio) {
                 user.faltas += 1;
                 user.deuda += 1000;
@@ -37,13 +33,11 @@ export async function evaluarFaltasYMorasAutomaticas() {
                 huboCambios = true;
             }
 
-            // Impactar base de datos si el usuario acumuló variaciones en su estado financiero
             if (huboCambios) {
                 await syncUsuario(user);
             }
         }
 
-        // Registrar el cierre del día evaluado en la memoria local y en Supabase
         state.dbEvaluatedDays.push(dia);
         await marcarDiaEvaluadoCloud(dia);
         

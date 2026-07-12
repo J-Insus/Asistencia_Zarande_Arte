@@ -1,4 +1,4 @@
-import {state} from '../core/state.js';
+import { state } from '../core/state.js';
 import { syncUsuario, removeUser, showLoader, hideLoader } from '../core/storage.js';
 import { renderUI } from '../core/render.js';
 import { cargarAuditoriaIndividual } from './consulta.js';
@@ -41,7 +41,6 @@ export async function abonarPagoCompleto(userId) {
 
 export async function removerPersona(userId) {
     if (confirm('¿Estás seguro de eliminar a esta persona del listado de control?')) {
-        // Ejecuta el DELETE remoto
         await removeUser(userId);
         state.dbUsers = state.dbUsers.filter(u => u.id !== userId);
         renderUI();
