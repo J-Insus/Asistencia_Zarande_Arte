@@ -1,6 +1,6 @@
 import state from '../core/state.js';
 import { registrarAsistenciaCloud, showLoader, hideLoader } from '../core/storage.js';
-import { getToday } from './date.js';
+import { getToday } from '../core/date.js';
 import renderUI from '../core/render.js';
 
 // ... Las funciones de inicialización y apertura de cámara permanecen intactas ...
