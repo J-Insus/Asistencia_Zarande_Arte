@@ -1,4 +1,5 @@
 import { setUsers, setAttendance, setEvaluatedDays } from './state.js';
+import { getToday } from './date.js';
 
 // Credenciales de Conexión de Supabase
 const SUPABASE_URL = "https://qniohapbmokobsgklfbg.supabase.co";

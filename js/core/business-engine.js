@@ -1,6 +1,6 @@
 import state from './state.js';
 import { syncUsuario, marcarDiaEvaluadoCloud, showLoader, hideLoader } from './storage.js';
-import getToday from './date.js';
+import { getToday } from './date.js';
 
 export async function evaluarFaltasYMorasAutomaticas() {
     const hoy = getToday();
