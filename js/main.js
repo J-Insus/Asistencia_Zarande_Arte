@@ -1,13 +1,13 @@
 import { loadViews } from './core/loader.js';
 import { loadData } from './core/storage.js';
 import { evaluarFaltasYMorasAutomaticas } from './core/business-engine.js';
-import renderUI from './core/render.js';
-import getToday from './core/date.js';
-import initScanModule from './modules/escanear.js';
-import initReportsModule from './modules/reportes.js';
-import initConsultaModule from './modules/consulta.js';
-import initGestionModule from './modules/gestion.js';
-import initNavigation from './modules/navigation.js';
+import { renderUI } from './core/render.js';
+import { getToday } from './core/date.js';
+import { initScanModule } from './modules/escanear.js';
+import { initReportsModule } from './modules/reportes.js';
+import { initConsultaModule } from './modules/consulta.js';
+import { initGestionModule } from './modules/gestion.js';
+import { initNavigation } from './modules/navigation.js';
 
 async function initApp() {
     // Bloquear renderizado de UI parcial hasta obtener datos de la nube

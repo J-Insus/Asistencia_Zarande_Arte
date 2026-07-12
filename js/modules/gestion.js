@@ -1,6 +1,6 @@
-import state from '../core/state.js';
+import {state} from '../core/state.js';
 import { syncUsuario, removeUser, showLoader, hideLoader } from '../core/storage.js';
-import renderUI from '../core/render.js';
+import { renderUI } from '../core/render.js';
 import { cargarAuditoriaIndividual } from './consulta.js';
 
 export async function agregarUsuario() {
