@@ -3,45 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Control de Asistencia QR</title>
-
+    <title>Sistema de Asistencia Privado</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+    <link rel="stylesheet" href="css/styles.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            red: '#BF1534',
-                            green: '#208C65',
-                            yellow: '#F29F05',
-                            orange: '#F2620F',
-                            light: '#F2F2F2'
-                        }
+                        brand: { red: '#BF1534', green: '#208C65', yellow: '#F29F05', orange: '#F2620F', light: '#F2F2F2' }
                     }
                 }
             }
         }
     </script>
-
-    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="text-gray-800 pb-24">
 
-    <header class="bg-white px-5 py-4 shadow-sm sticky top-0 z-40 flex justify-between items-center border-b border-gray-100">
-        <h1 class="text-base font-bold text-gray-900 tracking-tight">Sistema de Asistencia</h1>
-        <span id="header-date" class="text-xs font-bold text-brand-green bg-brand-green/10 px-2.5 py-1 rounded-lg"></span>
-    </header>
+    <!-- PANTALLA DE LOGIN OBLIGATORIO -->
+    <div id="auth-gate" class="fixed inset-0 bg-brand-light z-50 flex items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm space-y-4 border border-gray-100">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-brand-green/10 text-brand-green rounded-full flex items-center justify-center mx-auto mb-2 text-2xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h2 class="text-lg font-black text-gray-950">Ingreso Privado</h2>
+                <p class="text-xs text-gray-400">Introduce las credenciales de administración</p>
+            </div>
+            <div class="space-y-3">
+                <input type="text" id="auth-user" placeholder="Usuario" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-brand-green">
+                <input type="password" id="auth-pass" placeholder="Contraseña" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-brand-green">
+                <button id="btn-login" class="w-full bg-brand-green text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-transform text-sm">Iniciar Sesión</button>
+            </div>
+        </div>
+    </div>
 
-    <main id="app-main" class="p-4 max-w-lg mx-auto space-y-4"></main>
+    <!-- PANTALLA DE CARGA CON TEMÁTICA DE DANZA ANDINA -->
+    <div id="cloud-loader" class="fixed inset-0 bg-black/60 z-50 flex flex-col items-center justify-center space-y-4 hidden">
+        <div class="andean-spinner">
+            <div class="andean-block block-1"></div>
+            <div class="andean-block block-2"></div>
+            <div class="andean-block block-3"></div>
+            <div class="andean-block block-4"></div>
+        </div>
+        <p class="text-white text-xs font-bold tracking-widest uppercase animate-pulse">Sincronizando con la Nube...</p>
+    </div>
 
-    <div id="app-modal"></div>
+    <!-- CONTENEDORES DE LA APLICACIÓN (OCULTOS HASTA LOGUEARSE) -->
+    <div id="app-wrapper" class="hidden">
+        <header class="bg-white px-5 py-4 shadow-sm sticky top-0 z-40 flex justify-between items-center border-b border-gray-100">
+            <h1 class="text-base font-bold text-gray-900 tracking-tight">Sistema de Asistencia</h1>
+            <span id="header-date" class="text-xs font-bold text-brand-green bg-brand-green/10 px-2.5 py-1 rounded-lg"></span>
+        </header>
 
-    <div id="app-nav"></div>
+        <main id="app-main" class="p-4 max-w-lg mx-auto space-y-4"></main>
+        <div id="app-modal"></div>
+        <div id="app-nav"></div>
+    </div>
 
     <script type="module" src="js/main.js"></script>
 </body>

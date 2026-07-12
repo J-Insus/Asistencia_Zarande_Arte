@@ -1,33 +1,52 @@
-import { state } from './state.js';
-import { guardarDatos } from './storage.js';
-import { getToday } from './date.js';
+import state from './state.js';
+import { syncUsuario, marcarDiaEvaluadoCloud, showLoader, hideLoader } from './storage.js';
+import getToday from './date.js';
 
-// Solo evalúa fechas presentes en dbAttendance (días con al menos 1 validación confirmada).
-export function evaluarFaltasYMorasAutomaticas() {
+export async function evaluarFaltasYMorasAutomaticas() {
     const hoy = getToday();
+    // Iteramos sobre las llaves de días reales donde hubo escaneos confirmados
+    const diasConAsistencia = Object.keys(state.dbAttendance);
 
-    Object.keys(state.dbAttendance).forEach(dia => {
-        if (dia >= hoy || state.dbEvaluatedDays.includes(dia)) return;
+    for (const dia of diasConAsistencia) {
+        // Validación estricta: Saltarse el día actual y los días previamente cerrados/evaluados
+        if (dia >= hoy || state.dbEvaluatedDays.includes(dia)) continue;
 
-        const listaAsistidosseDia = state.dbAttendance[dia];
-        if (!listaAsistidosseDia?.length) return;
+        const listaAsistidosEseDia = state.dbAttendance[dia] || [];
+        if (listaAsistidosEseDia.length === 0) continue;
 
-        state.dbUsers.forEach(user => {
-            const asistio = listaAsistidosseDia.includes(user.id);
+        showLoader();
+
+        for (const user of state.dbUsers) {
+            const asistio = listaAsistidosEseDia.includes(user.id);
             const teniaDeudaPrevia = user.deuda > 0;
 
+            let huboCambios = false;
+
+            // 1. Recargo de mora recurrente por saldos históricos vencidos
             if (teniaDeudaPrevia) {
                 user.deuda += 1000;
+                huboCambios = true;
             }
 
+            // 2. Penalización automática por inasistencia en día activo pasado
             if (!asistio) {
                 user.faltas += 1;
                 user.deuda += 1000;
                 if (!user.historialFaltas) user.historialFaltas = [];
                 user.historialFaltas.push(dia);
+                huboCambios = true;
             }
-        });
+
+            // Impactar base de datos si el usuario acumuló variaciones en su estado financiero
+            if (huboCambios) {
+                await syncUsuario(user);
+            }
+        }
+
+        // Registrar el cierre del día evaluado en la memoria local y en Supabase
         state.dbEvaluatedDays.push(dia);
-    });
-    guardarDatos();
+        await marcarDiaEvaluadoCloud(dia);
+        
+        hideLoader();
+    }
 }
