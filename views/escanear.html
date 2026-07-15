@@ -1,29 +1,38 @@
 <section id="tab-scan" class="tab-content active space-y-4">
   
-    <!-- Pantalla 1: Inicio de Control -->
-    <div id="pantalla-inicio" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center flex flex-col items-center justify-center min-h-[60vh]">
-      <i class="fa-solid fa-clipboard-question text-6xl text-brand-orange mb-6"></i>
-      <h1 class="text-3xl font-black text-gray-800 tracking-tight mb-8">¿Quién nos Faltó?</h1>
-      <button id="btn-iniciar-revision" class="w-full max-w-xs bg-brand-green text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-transform text-lg">
-        Revisar Asistencia
-      </button>
+  <!-- Pantalla 1: Inicio de Control -->
+  <div id="pantalla-inicio" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center flex flex-col items-center justify-center min-h-[80vh]">
+    <i class="fa-solid fa-clipboard-question text-6xl text-brand-orange mb-6"></i>
+    <h1 class="text-4xl font-black text-gray-800 tracking-tight mb-8">¿Quién nos</h1>
+    <h1 class="text-4xl font-black text-gray-800 tracking-tight mb-16">Faltó?</h1>
+    <button id="btn-iniciar-revision" class="w-full max-w-xs bg-brand-green text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-transform text-lg">
+      Revisar Asistencia
+    </button>
+  </div>
+
+  <!-- Pantalla 2: Cuadrícula de Asistentes -->
+  <!-- Agregamos 'flex flex-col' para poder dividir el espacio -->
+  <div id="pantalla-cuadricula" class="hidden bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative min-h-[80vh] flex flex-col">
+    
+    <!-- Botón Guardar Flotante -->
+    <button id="btn-guardar-asistencia" class="absolute top-4 right-4 bg-brand-green text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md active:scale-95 transition-transform z-10 flex items-center gap-2">
+      <i class="fa-solid fa-cloud-arrow-up"></i> Guardar
+    </button>
+
+    <!-- Header: Ocupa el 25% y centra el contenido -->
+    <div class="h-[25%] flex flex-col justify-center items-center text-center mb-4">
+      <h2 class="text-2xl font-black text-gray-800 tracking-tight leading-tight">
+        Bloque de<br>Ada y Yesid
+      </h2>
+      <p class="text-[11px] text-gray-400 border-b border-gray-100 pb-2 border-dashed w-full mt-2">
+        Toca a un asistente para cambiar su estado.
+      </p>
     </div>
-  
-    <!-- Pantalla 2: Cuadrícula de Asistentes (Oculta al inicio) -->
-    <div id="pantalla-cuadricula" class="hidden bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative min-h-[60vh]">
-      
-      <!-- Botón Guardar Flotante Arriba a la Derecha -->
-      <button id="btn-guardar-asistencia" class="absolute top-4 right-4 bg-brand-green text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md active:scale-95 transition-transform z-10 flex items-center gap-2">
-        <i class="fa-solid fa-cloud-arrow-up"></i> Guardar
-      </button>
-  
-      <h2 class="text-xl font-black text-gray-800 tracking-tight mb-1 mt-2">Bloque de Ada y Yesid</h2>
-      <p class="text-[11px] text-gray-400 mb-6 border-b border-gray-100 pb-2 border-dashed">Toca a un asistente para cambiar su estado.</p>
-      
-      <!-- Contenedor del Grid (4 columnas usando Tailwind) -->
-      <div id="grid-asistentes" class="grid grid-cols-4 gap-2">
-        <!-- Los recuadros de cada persona se inyectarán aquí mediante JS -->
-      </div>
+    
+    <!-- Cuadrícula: Ocupa el resto del espacio -->
+    <div id="grid-asistentes" class="grid grid-cols-4 gap-2">
+      <!-- Los recuadros se inyectarán aquí -->
     </div>
-  
-  </section>
+  </div>
+
+</section>
