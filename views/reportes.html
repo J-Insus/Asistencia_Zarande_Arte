@@ -1,0 +1,29 @@
+<section id="tab-reports" class="tab-content space-y-4">
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <div>
+            <h2 class="text-xs font-bold uppercase text-gray-400 tracking-wider mb-2">Faltas del Bloque</h2>
+            <p class="text-[11px] text-gray-400">Filtra y visualiza las inasistencias y permisos.</p>
+        </div>
+
+        <select id="filtro-faltas" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-brand-green">
+            <option value="general">Vista General: Asistentes con Faltas</option>
+            <option value="calendario">Por Día (Calendario)</option>
+            <option value="totales">Lista Completa (Conteo Total)</option>
+        </select>
+
+        <div id="calendario-container" class="hidden animate-fade-in">
+            <input type="date" id="filtro-fecha" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:border-brand-green">
+        </div>
+
+        <div class="overflow-x-auto border border-gray-100 rounded-xl">
+            <table class="w-full text-left text-xs text-gray-600">
+                <thead id="faltas-thead">
+                    <!-- Dinámico -->
+                </thead>
+                <tbody id="faltas-tbody" class="divide-y divide-gray-100">
+                    <!-- Dinámico -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
