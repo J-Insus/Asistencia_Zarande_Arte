@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { getToday } from './date.js';
+import { calcularDatosHistoricos } from './storage.js'; // <--- Importamos el motor de cálculo
 
 export function renderConfirmedList() {
     const hoy = getToday();
@@ -21,31 +22,48 @@ export function renderConfirmedList() {
 
 export function renderReportsTable() {
     const tableBody = document.getElementById('reports-table-body');
-    tableBody.innerHTML = state.dbUsers.map(u => `
+    tableBody.innerHTML = state.dbUsers.map(u => {
+        // Calculamos los totales reales en tiempo real con el motor
+        const totales = calcularDatosHistoricos(u, state.dbAttendance);
+
+        return `
         <tr class="border-b border-gray-100 hover:bg-gray-50/50">
             <td class="py-2.5 px-2 font-medium text-gray-800">${u.nombre}</td>
-            <td class="py-2.5 px-2 text-center text-gray-500 font-bold">${u.faltas}</td>
-            <td class="py-2.5 px-2 text-right font-mono font-bold ${u.deuda > 0 ? 'text-brand-red' : 'text-brand-green'}">
-                $${u.deuda.toLocaleString('es-CO')}
+            <td class="py-2.5 px-2 text-center text-gray-500 font-bold">${totales.faltas}</td>
+            <td class="py-2.5 px-2 text-right font-mono font-bold ${totales.deuda > 0 ? 'text-brand-red' : 'text-brand-green'}">
+                $${totales.deuda.toLocaleString('es-CO')}
             </td>
         </tr>
-    `).join('');
+        `;
+    }).join('');
 }
 
 export function renderManageList() {
     const manageList = document.getElementById('manage-users-list');
-    manageList.innerHTML = state.dbUsers.map(u => `
+    manageList.innerHTML = state.dbUsers.map(u => {
+        // Calculamos los totales reales en tiempo real con el motor
+        const totales = calcularDatosHistoricos(u, state.dbAttendance);
+
+        return `
         <div class="flex justify-between items-center p-3 bg-white border border-gray-200/60 rounded-xl shadow-sm">
             <div class="flex-1 min-w-0 pr-2">
                 <p class="font-bold text-sm text-gray-900 truncate">${u.nombre}</p>
                 <p class="text-[10px] text-gray-400 font-mono truncate">ID QR: ${u.id}</p>
             </div>
             <div class="flex items-center gap-2">
-                ${u.deuda > 0 ? `<button data-action="condonar" data-user-id="${u.id}" class="bg-brand-yellow text-white text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 shadow-xs">Condonar</button>` : ''}
-                <button data-action="eliminar" data-user-id="${u.id}" class="text-gray-300 hover:text-brand-red p-1.5 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                <!-- El botón Condonar ahora evalúa "totales.deuda" en tiempo real -->
+                ${totales.deuda > 0 ? `
+                    <button data-action="condonar" data-user-id="${u.id}" class="bg-brand-yellow text-white text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 shadow-xs">
+                        Condonar
+                    </button>
+                ` : ''}
+                <button data-action="eliminar" data-user-id="${u.id}" class="text-gray-300 hover:text-brand-red p-1.5 transition-colors">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 export function renderSelectors() {
@@ -64,5 +82,6 @@ export function renderUI() {
     renderSelectors();
     renderConfirmedList();
     renderManageList();
+    renderReportsTable(); // Nos aseguramos de mantener actualizada también la tabla de reportes
     document.dispatchEvent(new Event('renderUI'));
 }

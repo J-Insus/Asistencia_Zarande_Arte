@@ -1,5 +1,6 @@
 import { setUsers, setAttendance, setPermisos, setEvaluatedDays } from './state.js';
 import { state } from './state.js';
+
 const SUPABASE_URL = "https://qniohapbmokobsgklfbg.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuaW9oYXBibW9rb2JzZ2tsZmJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2OTI2MjksImV4cCI6MjA5OTI2ODYyOX0.8SWUpkTIo86abIf_PILqqPGc7ek_pCP-dzL1Xa7RsqA";
 
@@ -8,6 +9,73 @@ export const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 export function showLoader() { document.getElementById('cloud-loader').classList.remove('hidden'); }
 export function hideLoader() { document.getElementById('cloud-loader').classList.add('hidden'); }
 
+// --- MOTOR DE CÁLCULO CENTRALIZADO EN STORAGE.JS ---
+export function calcularDatosHistoricos(user, dbAttendance) {
+    let deudaCalculada = 0;
+    let faltasCalculadas = 0;
+    const eventos = [];
+    const desglose = []; // <--- Nuevo array para registrar cada cargo individualmente
+
+    // 1. Extraer faltas y permisos del historial del usuario
+    if (user.historialFaltas) {
+        user.historialFaltas.forEach(f => {
+            eventos.push({ 
+                fecha: typeof f === 'object' ? f.fecha : f, 
+                tipo: f.tipo || 'sin_permiso' 
+            });
+        });
+    }
+
+    // 2. Extraer asistencias del estado global
+    if (dbAttendance) {
+        for (const [fecha, asistentes] of Object.entries(dbAttendance)) {
+            if (asistentes.includes(user.id)) {
+                eventos.push({ fecha: fecha, tipo: 'asistencia' });
+            }
+        }
+    }
+
+    // 3. Ordenar cronológicamente
+    eventos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+    // 4. Ejecutar las reglas de negocio sobre la línea de tiempo
+    eventos.forEach(ev => {
+        // REGLA: Si ANTES de este evento ya tiene deuda, se le aplican 500 de mora
+        if (deudaCalculada > 0) {
+            deudaCalculada += 500;
+            desglose.push({
+                fecha: ev.fecha,
+                concepto: 'Recargo por Mora (Saldo Pendiente)',
+                valor: 500,
+                esMora: true
+            });
+        }
+
+        // REGLA: Aplicar el costo específico del evento
+        if (ev.tipo === 'sin_permiso') {
+            deudaCalculada += 5000;
+            faltasCalculadas += 1;
+            desglose.push({
+                fecha: ev.fecha,
+                concepto: 'Falta Injustificada',
+                valor: 5000,
+                esMora: false
+            });
+        } else if (ev.tipo === 'con_permiso') {
+            deudaCalculada += 1000;
+            faltasCalculadas += 1;
+            desglose.push({
+                fecha: ev.fecha,
+                concepto: 'Falta Justificada (Permiso)',
+                valor: 1000,
+                esMora: false
+            });
+        }
+        // Si es 'asistencia' no genera cobro base, solo se le aplicó la mora arriba si debía.
+    });
+
+    return { deuda: deudaCalculada, faltas: faltasCalculadas, desglose };
+}
 export async function loadData() {
     showLoader();
     try {
@@ -54,10 +122,8 @@ export async function loadData() {
     }
 }
 
-
-
 export async function syncUsuario(user) {
-    // Calculamos el total con la función del Paso 1
+    // Calculamos el total con el motor centralizado
     const totales = calcularDatosHistoricos(user, state.dbAttendance);
     
     // Actualizamos el objeto local
@@ -90,55 +156,4 @@ export async function removeUser(userId) {
 
 export async function marcarDiaEvaluadoCloud(fecha) {
     await supabaseClient.from('dias_evaluados').upsert({ fecha });
-}
-
-
-
-// Agrega esta función de utilidad en core/storage.js
-function calcularDatosHistoricos(user, dbAttendance) {
-    let deudaCalculada = 0;
-    let faltasCalculadas = 0;
-    const eventos = [];
-
-    // 1. Extraer faltas y permisos del historial del usuario
-    if (user.historialFaltas) {
-        user.historialFaltas.forEach(f => {
-            eventos.push({ 
-                fecha: typeof f === 'object' ? f.fecha : f, 
-                tipo: f.tipo || 'sin_permiso' 
-            });
-        });
-    }
-
-    // 2. Extraer asistencias del estado global
-    if (dbAttendance) {
-        for (const [fecha, asistentes] of Object.entries(dbAttendance)) {
-            if (asistentes.includes(user.id)) {
-                eventos.push({ fecha: fecha, tipo: 'asistencia' });
-            }
-        }
-    }
-
-    // 3. Ordenar cronológicamente (vital para saber en qué momento se generó la deuda)
-    eventos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-
-    // 4. Ejecutar las reglas de negocio sobre la línea de tiempo
-    eventos.forEach(ev => {
-        // Regla: Si ANTES de este evento ya tiene deuda, se le suman 500 de mora
-        if (deudaCalculada > 0) {
-            deudaCalculada += 500;
-        }
-
-        // Regla: Aplicar el costo específico del evento
-        if (ev.tipo === 'sin_permiso') {
-            deudaCalculada += 5000;
-            faltasCalculadas += 1;
-        } else if (ev.tipo === 'con_permiso') {
-            deudaCalculada += 1000;
-            faltasCalculadas += 1;
-        }
-        // Si es 'asistencia', suma 0 (solo se le aplicó la mora arriba si debía)
-    });
-
-    return { deuda: deudaCalculada, faltas: faltasCalculadas };
 }

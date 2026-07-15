@@ -136,7 +136,7 @@ export function detenerCamara() {
             state.html5QrcodeScanner.stop();
             state.html5QrcodeScanner = null;
         } catch (e) {
-            console.error(e);
+            console.error(e); 
         }
     }
 }

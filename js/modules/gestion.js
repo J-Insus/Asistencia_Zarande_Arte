@@ -1,5 +1,5 @@
 import { state } from '../core/state.js';
-import { syncUsuario, removeUser, showLoader, hideLoader } from '../core/storage.js';
+import { syncUsuario, removeUser, showLoader, hideLoader, calcularDatosHistoricos } from '../core/storage.js';
 import { renderUI } from '../core/render.js';
 import { cargarAuditoriaIndividual } from './consulta.js';
 
@@ -21,9 +21,18 @@ export async function agregarUsuario() {
 
 export async function abonarPagoCompleto(userId) {
     const user = state.dbUsers.find(u => u.id === userId);
-    if (!user || user.deuda === 0) return;
+    if (!user) return;
 
-    if (confirm(`¿Confirmar recepción de pago por $${user.deuda.toLocaleString('es-CO')} de ${user.nombre}? Se limpiará su saldo.`)) {
+    // Calculamos el saldo real en tiempo real usando el motor de cálculo
+    const totalesCalculados = calcularDatosHistoricos(user, state.dbAttendance);
+
+    // Si el cálculo en tiempo real arroja que no tiene saldo pendiente, evitamos continuar
+    if (totalesCalculados.deuda === 0) {
+        alert(`${user.nombre} no tiene ninguna deuda pendiente por condonar/pagar.`);
+        return;
+    }
+
+    if (confirm(`¿Confirmar recepción de pago/condonación por $${totalesCalculados.deuda.toLocaleString('es-CO')} de ${user.nombre}? Se limpiará su saldo.`)) {
         showLoader();
         user.deuda = 0;
         user.faltas = 0;
