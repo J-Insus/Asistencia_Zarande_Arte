@@ -22,22 +22,22 @@ export function renderConfirmedList() {
 
 export function renderReportsTable() {
     const tableBody = document.getElementById('reports-table-body');
+    // Validación de seguridad: si no existe en el DOM, no hacer nada
+    if (!tableBody) return; 
+  
     tableBody.innerHTML = state.dbUsers.map(u => {
-        // Calculamos los totales reales en tiempo real con el motor
-        const totales = calcularDatosHistoricos(u, state.dbAttendance);
-
-        return `
-        <tr class="border-b border-gray-100 hover:bg-gray-50/50">
-            <td class="py-2.5 px-2 font-medium text-gray-800">${u.nombre}</td>
-            <td class="py-2.5 px-2 text-center text-gray-500 font-bold">${totales.faltas}</td>
-            <td class="py-2.5 px-2 text-right font-mono font-bold ${totales.deuda > 0 ? 'text-brand-red' : 'text-brand-green'}">
-                $${totales.deuda.toLocaleString('es-CO')}
-            </td>
-        </tr>
-        `;
+      const totales = calcularDatosHistoricos(u, state.dbAttendance);
+      return `
+      <tr class="border-b border-gray-100 hover:bg-gray-50/50">
+        <td class="py-2.5 px-2 font-medium text-gray-800">${u.nombre}</td>
+        <td class="py-2.5 px-2 text-center text-gray-500 font-bold">${totales.faltas}</td>
+        <td class="py-2.5 px-2 text-right font-mono font-bold ${totales.deuda > 0 ? 'text-brand-red' : 'text-brand-green'}">
+          $${totales.deuda.toLocaleString('es-CO')}
+        </td>
+      </tr>
+      `;
     }).join('');
-}
-
+  }
 export function renderManageList() {
     const manageList = document.getElementById('manage-users-list');
     manageList.innerHTML = state.dbUsers.map(u => {

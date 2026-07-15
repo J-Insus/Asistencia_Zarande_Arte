@@ -9,73 +9,104 @@ export const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 export function showLoader() { document.getElementById('cloud-loader').classList.remove('hidden'); }
 export function hideLoader() { document.getElementById('cloud-loader').classList.add('hidden'); }
 
-// --- MOTOR DE CÁLCULO CENTRALIZADO EN STORAGE.JS ---
+
+// MOTOR DE CALCULO CENTRALIZADO EN STORAGE.JS
 export function calcularDatosHistoricos(user, dbAttendance) {
     let deudaCalculada = 0;
     let faltasCalculadas = 0;
     const eventos = [];
-    const desglose = []; // <--- Nuevo array para registrar cada cargo individualmente
-
-    // 1. Extraer faltas y permisos del historial del usuario
+    const desglose = []; 
+  
+    // 1. Extraer faltas del historial del usuario
     if (user.historialFaltas) {
-        user.historialFaltas.forEach(f => {
-            eventos.push({ 
-                fecha: typeof f === 'object' ? f.fecha : f, 
-                tipo: f.tipo || 'sin_permiso' 
-            });
+      user.historialFaltas.forEach(f => {
+        const fechaFalta = typeof f === 'object' ? f.fecha : f;
+        const tipoFalta = typeof f === 'object' ? f.tipo : 'sin_permiso';
+        eventos.push({
+          fecha: fechaFalta,
+          tipo: tipoFalta
         });
+      });
     }
-
-    // 2. Extraer asistencias del estado global
+  
+    // 2. Extraer permisos de la tabla "permisos" (state.dbPermisos)
+    if (state.dbPermisos) {
+      for (const [fecha, autorizados] of Object.entries(state.dbPermisos)) {
+        if (autorizados.includes(user.id)) {
+          eventos.push({ fecha: fecha, tipo: 'con_permiso' });
+        }
+      }
+    }
+  
+    // 3. Extraer asistencias de la tabla "asistencias" (state.dbAttendance)
     if (dbAttendance) {
-        for (const [fecha, asistentes] of Object.entries(dbAttendance)) {
-            if (asistentes.includes(user.id)) {
-                eventos.push({ fecha: fecha, tipo: 'asistencia' });
-            }
+      for (const [fecha, asistentes] of Object.entries(dbAttendance)) {
+        if (asistentes.includes(user.id)) {
+          eventos.push({ fecha: fecha, tipo: 'asistencia' });
         }
+      }
     }
-
-    // 3. Ordenar cronológicamente
-    eventos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-
-    // 4. Ejecutar las reglas de negocio sobre la línea de tiempo
-    eventos.forEach(ev => {
-        // REGLA: Si ANTES de este evento ya tiene deuda, se le aplican 500 de mora
-        if (deudaCalculada > 0) {
-            deudaCalculada += 500;
-            desglose.push({
-                fecha: ev.fecha,
-                concepto: 'Recargo por Mora (Saldo Pendiente)',
-                valor: 500,
-                esMora: true
-            });
+  
+    // 4. Eliminar duplicados de fecha (por si un permiso está en el historial y en la tabla permisos)
+    const fechasUnicas = {};
+    const eventosFiltrados = eventos.filter(ev => {
+      if (fechasUnicas[ev.fecha]) {
+        // Priorizar permisos o asistencias sobre faltas simples en caso de colisión
+        if (ev.tipo !== 'sin_permiso') {
+          fechasUnicas[ev.fecha] = ev;
         }
-
-        // REGLA: Aplicar el costo específico del evento
-        if (ev.tipo === 'sin_permiso') {
-            deudaCalculada += 5000;
-            faltasCalculadas += 1;
-            desglose.push({
-                fecha: ev.fecha,
-                concepto: 'Falta Injustificada',
-                valor: 5000,
-                esMora: false
-            });
-        } else if (ev.tipo === 'con_permiso') {
-            deudaCalculada += 1000;
-            faltasCalculadas += 1;
-            desglose.push({
-                fecha: ev.fecha,
-                concepto: 'Falta Justificada (Permiso)',
-                valor: 1000,
-                esMora: false
-            });
-        }
-        // Si es 'asistencia' no genera cobro base, solo se le aplicó la mora arriba si debía.
+        return false;
+      }
+      fechasUnicas[ev.fecha] = ev;
+      return true;
     });
-
+  
+    // 5. Ordenar cronológicamente
+    eventosFiltrados.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+  
+    // 6. Ejecutar las reglas de negocio sobre la línea de tiempo
+    eventosFiltrados.forEach(ev => {
+      // REGLA: Si ANTES de este evento ya tiene deuda, se le aplican 500 de mora
+      if (deudaCalculada > 0) {
+        deudaCalculada += 500;
+        desglose.push({
+          fecha: ev.fecha,
+          concepto: 'Recargo por Mora (Saldo Pendiente)',
+          valor: 500,
+          esMora: true
+        });
+      }
+  
+      // REGLA: Aplicar el costo específico del evento
+      if (ev.tipo === 'sin_permiso') {
+        deudaCalculada += 5000;
+        faltasCalculadas += 1;
+        desglose.push({
+          fecha: ev.fecha,
+          concepto: 'Falta Injustificada',
+          valor: 5000,
+          esMora: false
+        });
+      } else if (ev.tipo === 'con_permiso') {
+        deudaCalculada += 1000;
+        faltasCalculadas += 1;
+        desglose.push({
+          fecha: ev.fecha,
+          concepto: 'Falta Justificada (Permiso)',
+          valor: 1000,
+          esMora: false
+        });
+      }
+    });
+  
     return { deuda: deudaCalculada, faltas: faltasCalculadas, desglose };
-}
+  }
+
+
+
+
+
+
 export async function loadData() {
     showLoader();
     try {
