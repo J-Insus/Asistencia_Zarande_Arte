@@ -1,26 +1,29 @@
 <section id="tab-scan" class="tab-content active space-y-4">
-    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center">
-        <h2 class="text-xs font-bold uppercase text-gray-400 tracking-wider mb-4">Escanear Código del Asistente</h2>
-
-        <div id="reader" class="w-full h-64 bg-gray-50 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-dashed border-gray-200 relative mb-4">
-            <span class="text-gray-400 text-xs p-4">Cámara inactiva</span>
-        </div>
-
-        <button id="btn-start-scan" class="w-full bg-brand-green text-white font-semibold py-3.5 rounded-xl shadow-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2 text-sm">
-            <i class="fa-solid fa-camera"></i> Encender Cámara
-        </button>
+  
+    <!-- Pantalla 1: Inicio de Control -->
+    <div id="pantalla-inicio" class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center flex flex-col items-center justify-center min-h-[60vh]">
+      <i class="fa-solid fa-clipboard-question text-6xl text-brand-orange mb-6"></i>
+      <h1 class="text-3xl font-black text-gray-800 tracking-tight mb-8">¿Quién nos Faltó?</h1>
+      <button id="btn-iniciar-revision" class="w-full max-w-xs bg-brand-green text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-transform text-lg">
+        Revisar Asistencia
+      </button>
     </div>
-
-    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-        <label class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Simular Lectura QR Manual</label>
-        <div class="flex gap-2 mt-2">
-            <select id="sim-select" class="w-2/3 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-brand-green"></select>
-            <button id="btn-sim-scan" class="bg-gray-100 text-gray-700 px-4 rounded-xl text-xs font-bold active:bg-gray-200">Escanear</button>
-        </div>
+  
+    <!-- Pantalla 2: Cuadrícula de Asistentes (Oculta al inicio) -->
+    <div id="pantalla-cuadricula" class="hidden bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative min-h-[60vh]">
+      
+      <!-- Botón Guardar Flotante Arriba a la Derecha -->
+      <button id="btn-guardar-asistencia" class="absolute top-4 right-4 bg-brand-green text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md active:scale-95 transition-transform z-10 flex items-center gap-2">
+        <i class="fa-solid fa-cloud-arrow-up"></i> Guardar
+      </button>
+  
+      <h2 class="text-xl font-black text-gray-800 tracking-tight mb-1 mt-2">Bloque de Ada y Yesid</h2>
+      <p class="text-[11px] text-gray-400 mb-6 border-b border-gray-100 pb-2 border-dashed">Toca a un asistente para cambiar su estado.</p>
+      
+      <!-- Contenedor del Grid (4 columnas usando Tailwind) -->
+      <div id="grid-asistentes" class="grid grid-cols-4 gap-2">
+        <!-- Los recuadros de cada persona se inyectarán aquí mediante JS -->
+      </div>
     </div>
-
-    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-        <h3 class="text-xs font-bold uppercase text-gray-400 tracking-wider mb-3">Validados Hoy</h3>
-        <ul id="confirmed-list" class="divide-y divide-gray-50 text-sm"></ul>
-    </div>
-</section>
+  
+  </section>

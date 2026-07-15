@@ -38,50 +38,45 @@ export function renderReportsTable() {
       `;
     }).join('');
   }
-export function renderManageList() {
-    const manageList = document.getElementById('manage-users-list');
-    manageList.innerHTML = state.dbUsers.map(u => {
-        // Calculamos los totales reales en tiempo real con el motor
-        const totales = calcularDatosHistoricos(u, state.dbAttendance);
+  export function renderManageList() {
+    // CORRECCIÓN: Asegúrate de usar 'manage-users-list' (todo minúsculas) igual que en tu HTML
+    const manageList = document.getElementById('manage-users-list'); 
+    if (!manageList) return; // Si no existe en la vista actual, no hacemos nada
 
+    manageList.innerHTML = state.dbUsers.map(u => {
+        const totales = calcularDatosHistoricos(u, state.dbAttendance);
         return `
         <div class="flex justify-between items-center p-3 bg-white border border-gray-200/60 rounded-xl shadow-sm">
-            <div class="flex-1 min-w-0 pr-2">
+            <div class="flex-1 min-w-0">
                 <p class="font-bold text-sm text-gray-900 truncate">${u.nombre}</p>
-                <p class="text-[10px] text-gray-400 font-mono truncate">ID QR: ${u.id}</p>
+                <p class="text-[10px] text-gray-400 font-mono truncate">ID: ${u.id}</p>
             </div>
             <div class="flex items-center gap-2">
-                <!-- El botón Condonar ahora evalúa "totales.deuda" en tiempo real -->
-                ${totales.deuda > 0 ? `
-                    <button data-action="condonar" data-user-id="${u.id}" class="bg-brand-yellow text-white text-[11px] font-bold px-3 py-1.5 rounded-lg active:scale-95 shadow-xs">
-                        Condonar
-                    </button>
-                ` : ''}
+                <button data-action="condonar" data-user-id="${u.id}" class="bg-brand-yellow text-white text-[10px] font-bold px-3 py-1.5 rounded-lg active:scale-95 shadow-xs">Condonar</button>
                 <button data-action="eliminar" data-user-id="${u.id}" class="text-gray-300 hover:text-brand-red p-1.5 transition-colors">
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </div>
-        </div>
-        `;
+        </div>`;
     }).join('');
 }
 
 export function renderSelectors() {
-    document.getElementById('sim-select').innerHTML = state.dbUsers.map(u =>
-        `<option value="${u.id}">${u.nombre}</option>`
-    ).join('');
-
+    // Si ya no usamos el selector de simulación, lo quitamos de aquí
     const auditSelect = document.getElementById('user-audit-select');
-    const selectedAuditUser = auditSelect.value;
-    auditSelect.innerHTML = `<option value="">-- Seleccionar Asistente --</option>` +
-        state.dbUsers.map(u => `<option value="${u.id}">${u.nombre}</option>`).join('');
-    auditSelect.value = selectedAuditUser;
+    if (auditSelect) {
+        auditSelect.innerHTML = '<option value="">Seleccionar Asistente</option>' + 
+            state.dbUsers.map(u => `<option value="${u.id}">${u.nombre}</option>`).join('');
+    }
 }
 
 export function renderUI() {
     renderSelectors();
-    renderConfirmedList();
-    renderManageList();
-    renderReportsTable(); // Nos aseguramos de mantener actualizada también la tabla de reportes
+    
+    // Solo renderizar si los elementos existen en la vista
+    if (document.getElementById('confirmed-list')) renderConfirmedList();
+    if (document.getElementById('reports-table-body')) renderReportsTable();
+    if (document.getElementById('manage-users-list')) renderManageList();
+    
     document.dispatchEvent(new Event('renderUI'));
 }

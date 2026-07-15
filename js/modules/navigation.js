@@ -1,4 +1,3 @@
-import { detenerCamara } from './escanear.js';
 
 export function switchTab(tabId, btn) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -11,9 +10,7 @@ export function switchTab(tabId, btn) {
     btn.classList.remove('text-gray-400');
     btn.classList.add('text-brand-green');
 
-    if (tabId !== 'tab-scan') {
-        detenerCamara();
-    }
+    
 }
 
 export function initNavigation() {
