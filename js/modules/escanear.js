@@ -25,10 +25,20 @@ function iniciarRevision() {
         uiState.ausentes = [];
     }
 
+    // 1. Mostramos la pantalla 2
     document.getElementById('pantalla-inicio').classList.add('hidden');
     document.getElementById('pantalla-cuadricula').classList.remove('hidden');
     
+    // 2. Renderizamos las tarjetas de los usuarios
     renderGrid();
+
+    // 3. NUEVO: Hacemos scroll al final de la página de forma inmediata
+    requestAnimationFrame(() => {
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'instant' // Usa 'instant' o 'auto' para que ya aparezca abajo sin desplazamiento animado
+        });
+    });
 }
 
 function renderGrid() {

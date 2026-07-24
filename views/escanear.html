@@ -13,32 +13,51 @@
   <!-- Pantalla 2: Cuadrícula de Asistentes -->
   <!-- Agregamos 'flex flex-col' para poder dividir el espacio -->
   <!-- Pantalla 2: Cuadricula de Asistentes -->
-<div id="pantalla-cuadricula" class="hidden bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative min-h-[80vh] flex flex-col">
-  
-  <!-- NUEVO: Botón Guardar Orden Flotante (Izquierda) -->
-  <button id="btn-guardar-orden" class="hidden absolute top-4 left-4 bg-brand-orange text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md active:scale-95 transition-transform z-10 flex items-center gap-2">
-    <i class="fa-solid fa-arrows-up-down"></i> Guardar Orden
-  </button>
+<!-- Pantalla 2: Cuadrícula de Asistentes -->
+<div id="pantalla-cuadricula" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-gray-100 min-h-[80vh] flex flex-col justify-between gap-10">
 
-  <!-- Botón Guardar Asistencia Flotante (Derecha) -->
-  <button id="btn-guardar-asistencia" class="absolute top-4 right-4 bg-brand-green text-white text-xs font-bold px-4 py-2 rounded-lg shadow-md active:scale-95 transition-transform z-10 flex items-center gap-2">
-    <i class="fa-solid fa-cloud-arrow-up"></i> Guardar
-  </button>
+ <!-- BLOQUE SUPERIOR: Cuadrícula de Asistentes -->
+ <div id="grid-asistentes" class="grid grid-cols-4 gap-3 flex-1">
+  <!-- Los recuadros se inyectarán aquí -->
+</div>
 
-  <!-- Header: Ocupa el 25% y centra el contenido -->
-  <div class="h-[25%] flex flex-col justify-center items-center text-center mb-4">
-    <h2 class="text-2xl font-black text-gray-800 tracking-tight leading-tight">
-      Bloque de<br>Ada y Yesid
-    </h2>
-    <p class="text-[11px] text-gray-400 border-b border-gray-100 pb-2 border-dashed w-full mt-2">
-      Toca a un asistente para cambiar su estado.
-    </p>
+
+  <!-- BLOQUE INFERIOR: Encabezado y Botones -->
+  <div class="w-full border-b border-gray-100 mb-3">
+    
+    <!-- 1. Título e Instrucción -->
+    <div class="text-center mb-6">
+      <h2 class="text-2xl font-black text-gray-800 tracking-tight leading-tight">
+        Bloque de<br>Ada y Yesid
+      </h2>
+      <p class="text-[11px] text-gray-400 mt-2">
+        Toca a un asistente para cambiar su estado.
+      </p>
+    </div>
+
+    <!-- 2. Barra de Botones (Ya no están flotando ni encimándose) -->
+    <div class="flex items-center justify-between gap-1 min-h-[40px]">
+      
+      <!-- Contenedor Izquierdo: Guardar Orden -->
+      <div>
+        <button id="btn-guardar-orden" class="hidden bg-brand-orange text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center gap-2">
+          <i class="fa-solid fa-arrows-up-down"></i> Guardar Orden
+        </button>
+      </div>
+
+      <!-- Contenedor Derecho: Guardar Asistencia -->
+      <div>
+        <button id="btn-guardar-asistencia" class="bg-brand-green text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Guardar
+        </button>
+      </div>
+
+    </div>
+
   </div>
-  
-  <!-- Cuadricula: Ocupa el resto del espacio -->
-  <div id="grid-asistentes" class="grid grid-cols-4 gap-2">
-    <!-- Los recuadros se inyectarán aquí -->
-  </div>
+
+ 
+
 </div>
 
 </section>
