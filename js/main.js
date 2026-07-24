@@ -1,3 +1,4 @@
+import { initOrdenModule } from './modules/orden_integrantes.js';
 import { loadViews } from './core/loader.js';
 import { loadData } from './core/storage.js';
 import { renderUI } from './core/render.js';
@@ -21,6 +22,7 @@ async function initApp() {
     
     initNavigation();
     initScanModule();
+    initOrdenModule(); // <--- Llamado al nuevo módulo de reordenamiento de cuadros
     initReportsModule();
     initConsultaModule();
     initGestionModule();

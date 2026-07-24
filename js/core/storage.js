@@ -3,109 +3,75 @@ import { state } from './state.js';
 
 const SUPABASE_URL = "https://qniohapbmokobsgklfbg.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuaW9oYXBibW9rb2JzZ2tsZmJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2OTI2MjksImV4cCI6MjA5OTI2ODYyOX0.8SWUpkTIo86abIf_PILqqPGc7ek_pCP-dzL1Xa7RsqA";
-
 export const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export function showLoader() { document.getElementById('cloud-loader').classList.remove('hidden'); }
 export function hideLoader() { document.getElementById('cloud-loader').classList.add('hidden'); }
-
 
 // MOTOR DE CALCULO CENTRALIZADO EN STORAGE.JS
 export function calcularDatosHistoricos(user, dbAttendance) {
     let deudaCalculada = 0;
     let faltasCalculadas = 0;
     const eventos = [];
-    const desglose = []; 
-  
-    // 1. Extraer faltas del historial del usuario
+    const desglose = [];
+
     if (user.historialFaltas) {
-      user.historialFaltas.forEach(f => {
-        const fechaFalta = typeof f === 'object' ? f.fecha : f;
-        const tipoFalta = typeof f === 'object' ? f.tipo : 'sin_permiso';
-        eventos.push({
-          fecha: fechaFalta,
-          tipo: tipoFalta
+        user.historialFaltas.forEach(f => {
+            const fechaFalta = typeof f === 'object' ? f.fecha : f;
+            const tipoFalta = typeof f === 'object' ? f.tipo : 'sin_permiso';
+            eventos.push({ fecha: fechaFalta, tipo: tipoFalta });
         });
-      });
     }
-  
-    // 2. Extraer permisos de la tabla "permisos" (state.dbPermisos)
+
     if (state.dbPermisos) {
-      for (const [fecha, autorizados] of Object.entries(state.dbPermisos)) {
-        if (autorizados.includes(user.id)) {
-          eventos.push({ fecha: fecha, tipo: 'con_permiso' });
+        for (const [fecha, autorizados] of Object.entries(state.dbPermisos)) {
+            if (autorizados.includes(user.id)) {
+                eventos.push({ fecha: fecha, tipo: 'con_permiso' });
+            }
         }
-      }
     }
-  
-    // 3. Extraer asistencias de la tabla "asistencias" (state.dbAttendance)
+
     if (dbAttendance) {
-      for (const [fecha, asistentes] of Object.entries(dbAttendance)) {
-        if (asistentes.includes(user.id)) {
-          eventos.push({ fecha: fecha, tipo: 'asistencia' });
+        for (const [fecha, asistentes] of Object.entries(dbAttendance)) {
+            if (asistentes.includes(user.id)) {
+                eventos.push({ fecha: fecha, tipo: 'asistencia' });
+            }
         }
-      }
     }
-  
-    // 4. Eliminar duplicados de fecha (por si un permiso está en el historial y en la tabla permisos)
+
     const fechasUnicas = {};
     const eventosFiltrados = eventos.filter(ev => {
-      if (fechasUnicas[ev.fecha]) {
-        // Priorizar permisos o asistencias sobre faltas simples en caso de colisión
-        if (ev.tipo !== 'sin_permiso') {
-          fechasUnicas[ev.fecha] = ev;
+        if (fechasUnicas[ev.fecha]) {
+            if (ev.tipo !== 'sin_permiso') {
+                fechasUnicas[ev.fecha] = ev;
+            }
+            return false;
         }
-        return false;
-      }
-      fechasUnicas[ev.fecha] = ev;
-      return true;
+        fechasUnicas[ev.fecha] = ev;
+        return true;
     });
-  
-    // 5. Ordenar cronológicamente
+
     eventosFiltrados.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-  
-    // 6. Ejecutar las reglas de negocio sobre la línea de tiempo
+
     eventosFiltrados.forEach(ev => {
-      // REGLA: Si ANTES de este evento ya tiene deuda, se le aplican 500 de mora
-      if (deudaCalculada > 0) {
-        deudaCalculada += 500;
-        desglose.push({
-          fecha: ev.fecha,
-          concepto: 'Recargo por Mora (Saldo Pendiente)',
-          valor: 500,
-          esMora: true
-        });
-      }
-  
-      // REGLA: Aplicar el costo específico del evento
-      if (ev.tipo === 'sin_permiso') {
-        deudaCalculada += 5000;
-        faltasCalculadas += 1;
-        desglose.push({
-          fecha: ev.fecha,
-          concepto: 'Falta Injustificada',
-          valor: 5000,
-          esMora: false
-        });
-      } else if (ev.tipo === 'con_permiso') {
-        deudaCalculada += 1000;
-        faltasCalculadas += 1;
-        desglose.push({
-          fecha: ev.fecha,
-          concepto: 'Falta Justificada (Permiso)',
-          valor: 1000,
-          esMora: false
-        });
-      }
+        if (deudaCalculada > 0) {
+            deudaCalculada += 500;
+            desglose.push({ fecha: ev.fecha, concepto: 'Recargo por Mora (Saldo Pendiente)', valor: 500, esMora: true });
+        }
+
+        if (ev.tipo === 'sin_permiso') {
+            deudaCalculada += 5000;
+            faltasCalculadas += 1;
+            desglose.push({ fecha: ev.fecha, concepto: 'Falta Injustificada', valor: 5000, esMora: false });
+        } else if (ev.tipo === 'con_permiso') {
+            deudaCalculada += 1000;
+            faltasCalculadas += 1;
+            desglose.push({ fecha: ev.fecha, concepto: 'Falta Justificada (Permiso)', valor: 1000, esMora: false });
+        }
     });
-  
+
     return { deuda: deudaCalculada, faltas: faltasCalculadas, desglose };
-  }
-
-
-
-
-
+}
 
 export async function loadData() {
     showLoader();
@@ -122,6 +88,10 @@ export async function loadData() {
         const { data: evaluatedRows, error: errEval } = await supabaseClient.from('dias_evaluados').select('*');
         if (errEval) throw errEval;
 
+        // NUEVO: Consultar el orden personalizado perpetuo
+        const { data: ordenRows, error: errOrden } = await supabaseClient.from('orden_usuarios').select('*');
+        if (errOrden) throw errOrden;
+
         const formattedAttendance = {};
         attendanceRows.forEach(row => {
             if (!formattedAttendance[row.fecha]) formattedAttendance[row.fecha] = [];
@@ -134,6 +104,19 @@ export async function loadData() {
             formattedPermisos[row.fecha].push(row.usuario_id);
         });
 
+        // NUEVO: Mapear posiciones y ordenar a los usuarios
+        const mapPosiciones = {};
+        if (ordenRows) {
+            ordenRows.forEach(row => { mapPosiciones[row.usuario_id] = row.posicion; });
+        }
+
+        users.sort((a, b) => {
+            // Los usuarios nuevos (sin posición) tendrán un valor muy alto para ir al final
+            const posA = mapPosiciones[a.id] !== undefined ? mapPosiciones[a.id] : 999999;
+            const posB = mapPosiciones[b.id] !== undefined ? mapPosiciones[b.id] : 999999;
+            return posA - posB;
+        });
+
         setUsers(users.map(u => ({
             id: u.id,
             nombre: u.nombre,
@@ -141,7 +124,7 @@ export async function loadData() {
             deuda: u.deuda,
             historialFaltas: u.historial_faltas || []
         })));
-        
+
         setAttendance(formattedAttendance);
         setPermisos(formattedPermisos);
         setEvaluatedDays(evaluatedRows.map(r => r.fecha));
@@ -154,14 +137,10 @@ export async function loadData() {
 }
 
 export async function syncUsuario(user) {
-    // Calculamos el total con el motor centralizado
     const totales = calcularDatosHistoricos(user, state.dbAttendance);
-    
-    // Actualizamos el objeto local
     user.deuda = totales.deuda;
     user.faltas = totales.faltas;
 
-    // Guardamos en Supabase el resultado exacto
     await supabaseClient.from('usuarios').upsert({
         id: user.id,
         nombre: user.nombre,
@@ -187,4 +166,19 @@ export async function removeUser(userId) {
 
 export async function marcarDiaEvaluadoCloud(fecha) {
     await supabaseClient.from('dias_evaluados').upsert({ fecha });
+}
+
+// NUEVO: Función de guardado de posiciones para el módulo drag & drop
+export async function guardarOrdenCloud(ordenIds) {
+    showLoader();
+    try {
+        const datosInsert = ordenIds.map((id, index) => ({ usuario_id: id, posicion: index }));
+        const { error } = await supabaseClient.from('orden_usuarios').upsert(datosInsert);
+        if (error) throw error;
+    } catch (err) {
+        console.error("Error guardando orden:", err);
+        throw err;
+    } finally {
+        hideLoader();
+    }
 }
