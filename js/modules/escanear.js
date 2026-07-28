@@ -85,7 +85,7 @@ function renderGrid() {
 
         btn.innerHTML = `
             <div class="absolute top-1 right-1 opacity-70 pointer-events-none">${icon}</div>
-            <span class="font-bold text-xs truncate w-full text-center mt-1 pointer-events-none">${nombreCorto}</span>
+            <span class="font-bold text-xs scale-90 truncate w-full text-center mt-1 pointer-events-none">${nombreCorto}</span>
         `;
 
         // Activamos los sensores del long-press de 4 segundos a la tarjeta
