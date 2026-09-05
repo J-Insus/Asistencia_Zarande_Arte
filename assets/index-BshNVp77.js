@@ -102,7 +102,7 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
           <input 
             type="date" 
             id="input-fecha" 
-            value="${new Date().toISOString().split(`T`)[0]}"
+            value="${new Date().toLocaleDateString(`sv-SE`,{timeZone:`America/Bogota`})}"
             class="w-full sm:w-auto bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-700 focus:outline-none focus:border-brand-green"
           />
         </div>
